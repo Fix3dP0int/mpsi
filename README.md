@@ -1,18 +1,13 @@
 # MPSI
 
-This project implements
-
-
-Vole-PSI implements the protocols described in [VOLE-PSI: Fast OPRF and Circuit-PSI from Vector-OLE](https://eprint.iacr.org/2021/266) and [Blazing Fast PSI from Improved OKVS and Subfield VOLE](misc/blazingFastPSI.pdf). The library implements standard [Private Set Intersection (PSI)](https://en.wikipedia.org/wiki/Private_set_intersection) along with a variant called Circuit PSI where the result is secret shared between the two parties.
-
-The library is cross platform (win,linux,mac) and depends on [libOTe](https://github.com/osu-crypto/libOTe), [sparsehash](https://github.com/sparsehash/sparsehash), [Coproto](https://github.com/Visa-Research/coproto).
+This project implements the protocols described in [[NTY21] Simple, Fast Malicious Multiparty Private Set Intersection](https://eprint.iacr.org/2021/1221.pdf) using the fast OKVS [[RR22] Blazing Fast PSI from Improved OKVS and Subfield VOLE](https://eprint.iacr.org/2022/320.pdf) which is implemented in [volepsi](https://github.com/Visa-Research/volepsi). The below guidance is copied from the repository volepsi. The `Executing` is added by this project. If you are familiar with the volepsi, you can just read it instead of reading all sections.
 
 ### Build
 
 The library can be cloned and built with networking support as
 ```
-git clone https://github.com/Visa-Research/volepsi.git
-cd volepsi
+git clone https://github.com/Fix3dP0int/mpsi.git
+cd mpsi
 python3 build.py -DVOLE_PSI_ENABLE_BOOST=ON
 ```
 If TCP/IP support is not required, then a minimal version of the library can be build by calling `python3 build.py`. See below and the cmake/python output for additional options.
@@ -75,3 +70,10 @@ If the dependency is installed to the system, then cmake should automatically fi
 python3 build.py -D CMAKE_PREFIX_PATH=install/prefix/path
 ```
 
+### Executing
+
+when you built the executable file, you can run the below commands. `-n` means the number of parties. `-k` means the size of set. `-p` means the ID of parties. `-v` means that it will show the details of time.
+
+```
+sudo ./out/build/linux/frontend/frontend -mpsi  -n 4 -k 10000000 -p 0 -v & sudo ./out/build/linux/frontend/frontend -mpsi  -n 4 -k 10000000 -p 1 -v & sudo ./out/build/linux/frontend/frontend -mpsi  -n 4 -k 10000000 -p 2 -v & sudo ./out/build/linux/frontend/frontend -mpsi  -n 4 -k 10000000 -p 3 -v
+```
