@@ -1,11 +1,10 @@
 #include "tests/UnitTests.h"
 #include "perf.h"
-
+#include "mpsi.h"
 #include "messagePassingExample.h"
 #include "networkSocketExample.h"
 #include "volePSI/fileBased.h"
 #include "tests/Paxos_Tests.h"
-
 int main(int argc, char** argv)
 {
     oc::CLP cmd(argc, argv);
@@ -42,6 +41,9 @@ int main(int argc, char** argv)
     {
         auto r = volePSI_Tests::Tests.runIf(cmd);
         return r == oc::TestCollection::Result::failed;
+    }
+    else if(cmd.isSet("mpsi")){
+        malcol_MPSI(cmd);
     }
     else
     {
