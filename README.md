@@ -1,6 +1,6 @@
 # MPSI
 
-This project implements the protocols described in [[NTY21] Simple, Fast Malicious Multiparty Private Set Intersection](https://eprint.iacr.org/2021/1221.pdf) using the fast OKVS [[RR22] Blazing Fast PSI from Improved OKVS and Subfield VOLE](https://eprint.iacr.org/2022/320.pdf) which is implemented in [volepsi](https://github.com/Visa-Research/volepsi). The below guidance is copied from the repository volepsi. The `Executing` is added by this project. If you are familiar with the volepsi, you can just read it instead of reading all sections.
+This project implements the protocols described in [[NTY21] Simple, Fast Malicious Multiparty Private Set Intersection](https://eprint.iacr.org/2021/1221.pdf) using the fast OKVS [[RR22] Blazing Fast PSI from Improved OKVS and Subfield VOLE](https://eprint.iacr.org/2022/320.pdf) and fast macilious OPPRF [[RS21]VOLE-PSI: Fast OPRF and Circuit-PSI from Vector-OLE](https://eprint.iacr.org/2021/266) which are implemented in [volepsi](https://github.com/Visa-Research/volepsi). The below guidance is copied from the repository volepsi. The `Executing` is added by this project. If you are familiar with the volepsi, you can just read it instead of reading all sections.
 
 ### Build
 
