@@ -22,7 +22,7 @@ namespace volePSI
         span<block> mB;
         block mD;
         Baxos mPaxos;
-        bool mMalicious = false;
+        bool mMalicious = true;
         block mW;
         u64 mBinSize = 1 << 14;
         u64 mSsp = 40;
@@ -48,7 +48,7 @@ namespace volePSI
     {
 
     public:
-        bool mMalicious = false;
+        bool mMalicious = true;
         oc::SilentVoleReceiver mVoleRecver;
         u64 mBinSize = 1 << 14;
         u64 mSsp = 40;

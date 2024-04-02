@@ -130,10 +130,24 @@ void fillRecvOPPRF(int i, int k, std::vector<block>& inputSet, std::vector<std::
     macoro::sync_wait(OPPRFServers[i].flush());
 }
 
+void recvThread(int i, int pIDx, std::vector<block>& sharingKey, std::vector<coproto::Socket>& KeyChlServers, std::atomic<int>& commu){
+    std::string ip = "localhost:" + std::to_string(1212 * i + pIDx);
+    KeyChlServers[i] = coproto::asioConnect(ip, 1);
+    macoro::sync_wait(KeyChlServers[i].recv(sharingKey[i]));
+    commu += KeyChlServers[i].bytesSent();
+}
+
+void sendThread(int i, int pIDx, std::vector<block>& sharingKey, std::vector<coproto::Socket>& KeyChlClients, std::atomic<int>& commu){
+    std::string ip = "localhost:" + std::to_string(1212 * pIDx + i);
+    KeyChlClients[i] = coproto::asioConnect(ip, 0);
+    macoro::sync_wait(KeyChlClients[i].send(sharingKey[i]));
+    commu += KeyChlClients[i].bytesSent();
+}
+
 void malcol_MPSI(const oc::CLP& cmd)
 {
     Timer timer;
-    auto k = cmd.get<int>("k");
+    auto k = cmd.getOr("k", 1ull << cmd.getOr("kk", 10));
     auto pIDx = cmd.get<int>("p");  // the party index
     auto n = cmd.get<int>("n");  // the number of parties
     auto v = cmd.getOr("v", cmd.isSet("v") ? 1 : 0);
@@ -165,18 +179,34 @@ void malcol_MPSI(const oc::CLP& cmd)
     auto end = start;
 
     //zero-sharing
-    for (auto i = 0; i < pIDx; i++){
-        std::string ip = "localhost:" + std::to_string(1212 * i + pIDx);
-        KeyChlServers[i] = coproto::asioConnect(ip, 1);
-        macoro::sync_wait(KeyChlServers[i].recv(sharingKey[i]));
-        commu += KeyChlServers[i].bytesSent();
+    // for (auto i = 0; i < pIDx; i++){
+    //     std::string ip = "localhost:" + std::to_string(1212 * i + pIDx);
+    //     KeyChlServers[i] = coproto::asioConnect(ip, 1);
+    //     macoro::sync_wait(KeyChlServers[i].recv(sharingKey[i]));
+    //     commu += KeyChlServers[i].bytesSent();
+    // }
+    // for (auto i = pIDx + 1; i < n; i++){
+    //     std::string ip = "localhost:" + std::to_string(1212 * pIDx + i);
+    //     KeyChlClients[i] = coproto::asioConnect(ip, 0);
+    //     macoro::sync_wait(KeyChlClients[i].send(sharingKey[i]));
+    //     commu += KeyChlClients[i].bytesSent();
+    // }
+    std::vector<std::thread> recvthreads;
+    for (auto i = 0; i < pIDx; i++) {
+        recvthreads.emplace_back(recvThread, i, pIDx, std::ref(sharingKey), std::ref(KeyChlServers), std::ref(commu));
     }
-    for (auto i = pIDx + 1; i < n; i++){
-        std::string ip = "localhost:" + std::to_string(1212 * pIDx + i);
-        KeyChlClients[i] = coproto::asioConnect(ip, 0);
-        macoro::sync_wait(KeyChlClients[i].send(sharingKey[i]));
-        commu += KeyChlClients[i].bytesSent();
+    for (auto& thread : recvthreads) {
+        thread.join();
     }
+
+    std::vector<std::thread> sendthreads;
+    for (auto i = pIDx + 1; i < n; i++) {
+        sendthreads.emplace_back(sendThread, i, pIDx, std::ref(sharingKey), std::ref(KeyChlClients), std::ref(commu));
+    }
+    for (auto& thread : sendthreads) {
+        thread.join();
+    }
+
     AES aes;
     std::vector<block> sh(k);
     for (auto h = 0; h < k; ++h){
@@ -242,7 +272,6 @@ void malcol_MPSI(const oc::CLP& cmd)
     if (v)
         std::cout << timer << std::endl;
     auto tt = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / double(1000);
-	std::cout << "total time " << tt << "ms" << std::endl;
-    std::cout << "total commu " << commu << "bytes" << std::endl;
+	std::cout << "party ID: " << pIDx << "   total time: " << tt << " ms" << std::endl;
+    std::cout << "party ID: " << pIDx << "   total commu: " << commu << " bytes" << std::endl;
 }
-
